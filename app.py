@@ -1,40 +1,41 @@
-import streamlit as st
+ import streamlit as st
 
-# 1. 页面设置
-st.set_page_config(page_title="外贸成交助手", page_icon="💰")
+# 1. 页面配置
+st.set_page_config(page_title="医美器械报价系统", page_icon="🩺")
+
+# 2. 标题和气球正反馈
 st.balloons()
+st.title("💎 医美产品展示与报价")
 
-# 2. 标题
-st.title("⚖️ 外贸报价与汇率换算器")
+# 3. 展示产品图片
+# 这里的 "product.jpg" 必须和你刚才上传的文件名一模一样
+try:
+    st.image("product.jpg", caption="当前主推：专业级医美设备", use_container_width=True)
+except:
+    st.warning("提示：请在 GitHub 仓库上传一张名为 product.jpg 的图片，图片就会显示在这里。")
+
+# 4. 报价计算逻辑
 st.write("---")
+col1, col2 = st.columns(2) # 把页面分成两列，左边选配置，右边出结果
 
-# 3. 汇率换算模块
-st.header("💵 实时汇率换算")
-# 假设当前汇率是 7.2，你可以手动改这个数字
-exchange_rate = st.number_input("当前美金对人民币汇率：", value=7.20, step=0.01)
+with col1:
+    st.subheader("配置选择")
+    model = st.selectbox("选择型号：", ["标准款", "旗舰款", "定制款"])
+    base_price = 15000 if model == "标准款" else 25000
+    quantity = st.number_input("订购数量：", min_value=1, value=1)
 
-usd_amount = st.number_input("请输入美金金额 ($)：", min_value=0.0, value=1000.0)
-cny_result = usd_amount * exchange_rate
-
-# 用醒目的方式显示结果
-st.metric(label="换算成人民币 (¥)", value=f"¥{cny_result:,.2f}")
-
-st.write("---")
-
-# 4. 产品报价小工具
-st.header("📦 产品报价记录")
-product_name = st.text_input("产品名称（如：医疗美容仪）：", "医用激光设备")
-cost = st.number_input("成本价 (¥)：", value=5000.0)
-
-if st.button("计算利润率"):
-    profit = cny_result - cost
-    profit_margin = (profit / cny_result) * 100 if cny_result > 0 else 0
+with col2:
+    st.subheader("实时报价")
+    total_usd = base_price * quantity
+    st.metric(label="总计金额 (USD)", value=f"${total_usd:,}")
     
-    if profit > 0:
-        st.success(f"🎉 预估利润：¥{profit:,.2f} | 利润率：{profit_margin:.2f}%")
-        st.snow()
-    else:
-        st.error(f"⚠️ 预估亏损：¥{profit:,.2f}，请重新核算报价！")
+    # 汇率换算逻辑
+    rate = 7.2
+    total_cny = total_usd * rate
+    st.write(f"折合人民币：¥{total_cny:,.2f}")
 
-# 5. 底部正反馈
-st.info("💡 提示：你可以把这个网页收藏到手机浏览器，出差谈客户时随时计算。")
+# 5. 生成合同预览
+if st.button("生成电子报价单预览"):
+    st.snow()
+    st.write(f"### 报价单预览")
+    st.info(f"项目：{model} 医美设备\n\n数量：{quantity}\n\n状态：库存充足")

@@ -2,80 +2,94 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime
 
-# --- 1. 页面配置与美化 ---
-st.set_page_config(page_title="外贸全能管家", layout="wide", page_icon="💼")
+# 页面配置：设置成宽屏模式
+st.set_page_config(page_title="医美器械专业报价系统", layout="wide", page_icon="📝")
 
-# 注入一点正反馈：今日份的好运
-st.balloons()
+# 氛围感：雪花特效（象征高端医美冰爽感）
+st.snow()
 
-# --- 2. 标题与核心指标 ---
-st.title("🛡️ 医疗美容外贸客户管理系统 (CRM)")
-st.markdown(f"**今天是：{datetime.now().strftime('%Y-%m-%d')}** | 助你签下大单！")
+# --- 侧边栏：全局设置 ---
+with st.sidebar:
+    st.header("⚙️ 核心参数设置")
+    # 汇率可以手动调节，确保报价实时性
+    rate = st.number_input("今日美金汇率 (USD/CNY)", value=7.22, step=0.01)
+    tax_rate = st.slider("预估出口退税率 (%)", 0, 13, 13)
+    st.divider()
+    st.info("💡 提示：修改汇率后，所有报价将自动重新计算。")
 
-# 模拟三个关键指标
-col1, col2, col3, col4 = st.columns(4)
-col1.metric("本月询盘", "42", "↑ 5")
-col2.metric("在谈订单", "$128,500", "↑ 12%")
-col3.metric("本月成交", "8 个", "Target: 10")
-col4.metric("客户活跃度", "92%", "Excellent")
+# --- 主界面：报价器 ---
+st.title("🏥 医美器械海外报价工作台")
+st.write(f"生成时间：{datetime.now().strftime('%Y-%m-%d %H:%M')}")
 
-st.divider()
+# 第一部分：产品选择与基础报价
+col1, col2 = st.columns([2, 1])
 
-# --- 3. 客户数据录入区（模拟数据库） ---
-st.header("📋 客户动态管理")
-
-# 我们创建一个初始表格数据
-if 'customer_data' not in st.session_state:
-    st.session_state.customer_data = pd.DataFrame([
-        {"客户名称": "Dubai Aesthetic Clinic", "国家": "阿联酋", "产品意向": "激光脱毛仪", "状态": "报价中", "预计金额": 15000},
-        {"客户名称": "Paris Medical Group", "国家": "法国", "产品意向": "皮秒激光", "状态": "待付款", "预计金额": 32000},
-        {"客户名称": "Seoul Skin Center", "国家": "韩国", "产品意向": "热玛吉代工", "状态": "已成交", "预计金额": 28000},
-    ])
-
-# 核心功能：数据编辑器（你可以直接像 Excel 这样改）
-edited_df = st.data_editor(
-    st.session_state.customer_data,
-    num_rows="dynamic", # 允许你动态增加行
-    use_container_width=True,
-    column_config={
-        "状态": st.column_config.SelectboxColumn(
-            options=["初次联系", "报价中", "样机测试", "待付款", "已成交", "售后中"]
-        ),
-        "预计金额": st.column_config.NumberColumn(format="$ %d")
+with col1:
+    st.subheader("1. 选择产品与配置")
+    # 模拟医美产品数据
+    product_data = {
+        "热玛吉代工设备 (旗舰版)": 12000,
+        "光子嫩肤仪 (诊所专用)": 8500,
+        "PRP 高速离心机": 1200,
+        "医用水氧动力仪": 3500
     }
-)
+    
+    selected_product = st.selectbox("产品名称", list(product_data.keys()))
+    base_price_usd = product_data[selected_product]
+    
+    qty = st.number_input("订购数量 (Sets)", min_value=1, value=1)
+    discount = st.slider("客户折扣 (%)", 0, 30, 0)
 
-# 保存修改
-if st.button("💾 保存所有修改"):
-    st.session_state.customer_data = edited_df
-    st.toast("客户数据已实时保存！", icon="✅")
+with col2:
+    st.subheader("2. 物流与杂费")
+    shipping_method = st.radio("运输方式", ["空运 (Air)", "海运 (Sea)", "快递 (Express)"])
+    shipping_fee = st.number_input("单台预估运费 (USD)", value=150 if shipping_method == "空运 (Air)" else 50)
 
+# --- 第二部分：自动计算核心数据 ---
 st.divider()
+st.subheader("💰 报价明细汇总")
 
-# --- 4. 业务深度互动 ---
-left_col, right_col = st.columns(2)
+# 计算逻辑
+unit_price_after_discount = base_price_usd * (1 - discount/100)
+total_product_usd = unit_price_after_discount * qty
+total_shipping_usd = shipping_fee * qty
+final_total_usd = total_product_usd + total_shipping_usd
+final_total_cny = final_total_usd * rate
 
-with left_col:
-    st.subheader("💡 智能报价建议")
-    client_name = st.selectbox("选择目标客户进行分析：", edited_df["客户名称"])
-    discount = st.slider("给予折扣范围 (%)", 0, 20, 5)
+# 视觉反馈卡片
+res1, res2, res3 = st.columns(3)
+res1.metric("单台成交价 (USD)", f"${unit_price_after_discount:,.2f}")
+res2.metric("总金额 (USD)", f"${final_total_usd:,.2f}", delta=f"含运费 ${total_shipping_usd}")
+res3.metric("折合人民币 (CNY)", f"¥{final_total_cny:,.2f}", help="按侧边栏汇率计算")
+
+# --- 第三部分：专业建议与导出 ---
+st.divider()
+col_a, col_b = st.columns(2)
+
+with col_a:
+    st.subheader("📈 利润分析")
+    # 假设一个简单的成本线
+    estimated_cost_cny = (base_price_usd * 0.5) * rate 
+    profit_cny = final_total_cny - (estimated_cost_cny * qty)
     
-    # 查找选定客户的价格
-    base_price = edited_df[edited_df["客户名称"] == client_name]["预计金额"].values[0]
-    final_price = base_price * (1 - discount/100)
-    
-    st.warning(f"对 {client_name} 的最终建议报价为：**${final_price:,.2f}**")
-    if st.button("生成报价草案"):
-        st.snow()
-        st.info("报价草案已生成，已准备好发送至您的邮箱。")
+    if profit_cny > 0:
+        st.success(f"预计毛利：¥{profit_cny:,.2f} (含退税)")
+    else:
+        st.error("警告：当前报价可能低于成本线，请核算！")
 
-with right_col:
-    st.subheader("📊 业务分布概览")
-    # 简单统计图表
-    status_counts = edited_df["状态"].value_counts()
-    st.bar_chart(status_counts)
-
-# --- 5. 底部贴心小工具 ---
-with st.expander("🛠️ 外贸常用小工具"):
-    st.write("1. **时差对照**：迪拜时间 = 北京时间 - 4小时")
-    st.write("2. **单位转换**：1 英寸 = 2.54 厘米 (常用于仪器屏幕规格说明)")
+with col_b:
+    st.subheader("📄 快捷操作")
+    if st.button("🚀 生成正式报价单草案"):
+        st.balloons()
+        st.toast("报价单已准备好，可截图发给客户！")
+        st.code(f"""
+        QUOTATION PREVIEW
+        -----------------
+        Product: {selected_product}
+        Quantity: {qty}
+        Unit Price: ${unit_price_after_discount:,.2f}
+        Shipping: ${total_shipping_usd} ({shipping_method})
+        -----------------
+        Total Amount: ${final_total_usd:,.2f}
+        Validity: 7 Days
+        """)

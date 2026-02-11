@@ -1,40 +1,40 @@
 import streamlit as st
-import time
 
-# 1. 页面配置
-st.set_page_config(page_title="外贸精英助手", page_icon="🌍")
-
-# 2. 炫酷开场
+# 1. 页面设置
+st.set_page_config(page_title="外贸成交助手", page_icon="💰")
 st.balloons()
-st.title("🚀 外贸业务增长工作台")
 
-# 3. 侧边栏：模拟客户信息管理
-with st.sidebar:
-    st.header("客户档案管理")
-    client_name = st.text_input("海外客户名称：", "Dubai Clinic")
-    product_type = st.selectbox("意向产品线：", ["医疗美容仪器", "诊所耗材", "实验室设备"])
-    st.write("---")
-    st.info("💡 提示：填写后主界面将同步更新")
+# 2. 标题
+st.title("⚖️ 外贸报价与汇率换算器")
+st.write("---")
 
-# 4. 主界面互动
-st.subheader(f"📅 正在为 {client_name} 生成报价方案")
+# 3. 汇率换算模块
+st.header("💵 实时汇率换算")
+# 假设当前汇率是 7.2，你可以手动改这个数字
+exchange_rate = st.number_input("当前美金对人民币汇率：", value=7.20, step=0.01)
 
-# 模拟一个进度条，模拟AI正在计算
-progress_text = "方案优化中，请稍候..."
-my_bar = st.progress(0, text=progress_text)
+usd_amount = st.number_input("请输入美金金额 ($)：", min_value=0.0, value=1000.0)
+cny_result = usd_amount * exchange_rate
 
-for percent_complete in range(100):
-    time.sleep(0.01)
-    my_bar.progress(percent_complete + 1, text=progress_text)
+# 用醒目的方式显示结果
+st.metric(label="换算成人民币 (¥)", value=f"¥{cny_result:,.2f}")
 
-# 5. 核心正反馈按钮
-if st.button("生成今日业务报告"):
-    st.snow()
-    st.success(f"✅ 已成功录入：{client_name} 的 {product_type} 询盘")
-    st.metric(label="预计成交金额", value="$12,500", delta="+15%")
-    st.info("加油！距离本月外贸业绩目标还差 20%。")
+st.write("---")
 
-# 6. 小彩蛋：心情打卡
-mood = st.feedback("stars")
-if mood is not None:
-    st.write("感谢打分！保持好心情是谈成大单的关键。")
+# 4. 产品报价小工具
+st.header("📦 产品报价记录")
+product_name = st.text_input("产品名称（如：医疗美容仪）：", "医用激光设备")
+cost = st.number_input("成本价 (¥)：", value=5000.0)
+
+if st.button("计算利润率"):
+    profit = cny_result - cost
+    profit_margin = (profit / cny_result) * 100 if cny_result > 0 else 0
+    
+    if profit > 0:
+        st.success(f"🎉 预估利润：¥{profit:,.2f} | 利润率：{profit_margin:.2f}%")
+        st.snow()
+    else:
+        st.error(f"⚠️ 预估亏损：¥{profit:,.2f}，请重新核算报价！")
+
+# 5. 底部正反馈
+st.info("💡 提示：你可以把这个网页收藏到手机浏览器，出差谈客户时随时计算。")

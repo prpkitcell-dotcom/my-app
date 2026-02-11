@@ -1,7 +1,7 @@
 import streamlit as st
 
 st.balloons() # 一进来就喷气球庆功！
-st.title"（"这是 [你的名字] 开发的第一个神器！"） 
+st.title"("这是我的第一个神器！")
 name = st.text_input("请输入你的名字：")
 if name:
     st.write(f"你好 {name}，你已经正式跨入了开发者的大门！")

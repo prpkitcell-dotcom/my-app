@@ -10,7 +10,8 @@ st.title("💎 医美产品展示与报价")
 # 3. 展示产品图片
 # 这里的 "product.jpg" 必须和你刚才上传的文件名一模一样
 try:
-    st.image("product.jpg", caption="当前主推：专业级医美设备", use_container_width=True)
+   # 我们直接用一张网上的医美仪器图片地址，这样你就不需要手动上传文件了
+st.image("https://images.unsplash.com/photo-1614851012101-85767a163980?q=80&w=800", caption="主推设备：激光美容仪预览图", use_container_width=True)
 except:
     st.warning("提示：请在 GitHub 仓库上传一张名为 product.jpg 的图片，图片就会显示在这里。")
 

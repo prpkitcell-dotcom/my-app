@@ -1,19 +1,19 @@
 import streamlit as st
 
-# 1. 自动触发正反馈效果
-st.balloons() 
+# 1. 自动撒花庆祝成功
+st.balloons()
 
-# 2. 设置一个大标题（注意括号和引号都是英文）
+# 2. 这里的括号和引号全是英文格式，千万不要手动改
 st.title("我的第一个 AI 智能 App")
 
-# 3. 添加一个简单的互动
-name = st.text_input("请输入你的大名：", "未来开发者")
+# 3. 互动模块
+name = st.text_input("请输入你的名字：", "天才开发者")
 
-# 4. 逻辑判断
-if st.button("点我启动惊喜"):
-    st.write(f"你好，{name}！恭喜你成功修复了代码报错。")
-    st.snow() # 屏幕会下雪
-   st.error("这证明你已经具备了解决问题的开发者潜质！")
-st.progress(80)
-# 5. 展示一张图片或状态
-st.info("项目进度：已完成 100% 部署测试")
+if st.button("启动惊喜"):
+    st.snow()
+    st.success(f"太棒了 {name}！你已经成功修复了所有报错！")
+    st.write("现在的你已经是一名初级开发者了。")
+
+# 4. 进度条正反馈
+st.progress(100)
+st.info("项目状态：部署成功 🚀")
